@@ -1,4 +1,3 @@
-
 package com.lupoplayer.app
 
 import android.app.Activity
@@ -14,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -62,13 +62,7 @@ class MainActivity : Activity() {
             setPadding(0, dp(10), 0, dp(20))
         }
 
-        scroll.addView(
-            content,
-            ScrollView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
+        scroll.addView(content)
 
         root.addView(
             scroll,
@@ -82,29 +76,51 @@ class MainActivity : Activity() {
         return root
     }
 
+    // ECHTES LUPO LOGO
+
+    private fun addLupoLogo(size: Int) {
+        val logo = ImageView(this).apply {
+            setImageResource(R.drawable.lupo_logo)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            adjustViewBounds = true
+            contentDescription = "LUPO PLAYER Logo"
+        }
+
+        content.addView(
+            logo,
+            LinearLayout.LayoutParams(
+                dp(size),
+                dp(size)
+            ).apply {
+                gravity = Gravity.CENTER
+            }
+        )
+    }
+
     // STARTSEITE
 
     private fun showHome() {
         val root = base()
 
-        space(12)
-        text("🐺", 54, gold, true)
-        text("LUPO PLAYER", 38, gold, true)
+        space(8)
+        addLupoLogo(145)
+
+        text("LUPO PLAYER", 34, gold, true)
         text("PREMIUM ENTERTAINMENT", 14, white, true)
 
-        space(28)
+        space(20)
 
         val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(dp(24), dp(28), dp(24), dp(28))
+            setPadding(dp(24), dp(25), dp(24), dp(25))
             background = rounded(panel, 20)
         }
 
         hero.addView(
             TextView(this).apply {
                 text = "WILLKOMMEN BEI LUPO"
-                textSize = 27f
+                textSize = 26f
                 setTextColor(white)
                 gravity = Gravity.CENTER
                 setTypeface(null, Typeface.BOLD)
@@ -129,15 +145,14 @@ class MainActivity : Activity() {
             )
         )
 
-        space(25)
+        space(22)
         text("ENTDECKEN", 20, gold, true)
-        space(12)
+        space(10)
 
-        content.addView(
-            tvButton("LIVE TV") {
-                showCategory("LIVE TV")
-            }
-        )
+        val live = tvButton("LIVE TV") {
+            showCategory("LIVE TV")
+        }
+        content.addView(live)
 
         content.addView(
             tvButton("FILME") {
@@ -170,25 +185,23 @@ class MainActivity : Activity() {
         )
 
         space(20)
-        text("LUPO PLAYER  •  PREMIUM", 12, muted, true)
+        text("DEIN STREAMING. DEIN ERLEBNIS.", 12, gold, true)
 
         setContentView(root)
 
-        root.post {
-            content.getChildAt(3)?.requestFocus()
-        }
+        live.requestFocus()
     }
 
-    // KATEGORIE-SEITEN
+    // KATEGORIEN
 
     private fun showCategory(name: String) {
         val root = base()
 
-        space(20)
-        text("🐺 LUPO PLAYER", 30, gold, true)
-        space(35)
+        space(10)
+        addLupoLogo(110)
         text(name, 30, white, true)
-        space(20)
+
+        space(25)
 
         text(
             "Hier erscheinen deine Inhalte.",
@@ -206,13 +219,12 @@ class MainActivity : Activity() {
             false
         )
 
-        space(35)
+        space(30)
 
-        content.addView(
-            tvButton("ZURÜCK ZUR STARTSEITE") {
-                showHome()
-            }
-        )
+        val back = tvButton("ZURÜCK ZUR STARTSEITE") {
+            showHome()
+        }
+        content.addView(back)
 
         content.addView(
             tvButton("EINSTELLUNGEN") {
@@ -221,9 +233,7 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
-        root.post {
-            content.getChildAt(content.childCount - 2).requestFocus()
-        }
+        back.requestFocus()
     }
 
     // EINSTELLUNGEN
@@ -231,17 +241,16 @@ class MainActivity : Activity() {
     private fun showSettings() {
         val root = base()
 
-        space(20)
-        text("🐺 LUPO PLAYER", 30, gold, true)
-        text("EINSTELLUNGEN", 24, white, true)
+        space(10)
+        addLupoLogo(110)
+        text("EINSTELLUNGEN", 26, white, true)
 
-        space(30)
+        space(25)
 
-        content.addView(
-            tvButton("XTREAM CODES ANMELDEN") {
-                showXtream()
-            }
-        )
+        val xtream = tvButton("XTREAM CODES ANMELDEN") {
+            showXtream()
+        }
+        content.addView(xtream)
 
         content.addView(
             tvButton("M3U PLAYLIST") {
@@ -264,9 +273,7 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
-        root.post {
-            content.getChildAt(0).requestFocus()
-        }
+        xtream.requestFocus()
     }
 
     // XTREAM LOGIN
@@ -274,11 +281,11 @@ class MainActivity : Activity() {
     private fun showXtream() {
         val root = base()
 
-        space(20)
-        text("LUPO PLAYER", 30, gold, true)
-        text("XTREAM CODES", 23, white, true)
+        space(10)
+        addLupoLogo(100)
+        text("XTREAM CODES", 24, white, true)
 
-        space(25)
+        space(20)
 
         val server = input(
             "Server-URL",
@@ -299,19 +306,19 @@ class MainActivity : Activity() {
 
         space(15)
 
-        content.addView(
-            tvButton("VERBINDEN") {
-                if (
-                    server.text.isBlank() ||
-                    username.text.isBlank() ||
-                    password.text.isBlank()
-                ) {
-                    toast("Bitte alle Felder ausfüllen.")
-                } else {
-                    toast("Anmeldedaten erfasst. Die Anbieter-Verbindung muss noch integriert werden.")
-                }
+        val connect = tvButton("VERBINDEN") {
+            if (
+                server.text.isBlank() ||
+                username.text.isBlank() ||
+                password.text.isBlank()
+            ) {
+                toast("Bitte alle Felder ausfüllen.")
+            } else {
+                toast("Anmeldedaten erfasst. Die Anbieter-Verbindung muss noch integriert werden.")
             }
-        )
+        }
+
+        content.addView(connect)
 
         content.addView(
             tvButton("ZURÜCK") {
@@ -320,9 +327,7 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
-        root.post {
-            server.requestFocus()
-        }
+        server.requestFocus()
     }
 
     // M3U PLAYLIST
@@ -330,11 +335,11 @@ class MainActivity : Activity() {
     private fun showM3u() {
         val root = base()
 
-        space(20)
-        text("LUPO PLAYER", 30, gold, true)
-        text("M3U PLAYLIST", 23, white, true)
+        space(10)
+        addLupoLogo(100)
+        text("M3U PLAYLIST", 24, white, true)
 
-        space(25)
+        space(20)
 
         val url = input(
             "M3U Playlist URL",
@@ -344,15 +349,15 @@ class MainActivity : Activity() {
 
         space(15)
 
-        content.addView(
-            tvButton("PLAYLIST LADEN") {
-                if (url.text.isBlank()) {
-                    toast("Bitte eine Playlist-URL eingeben.")
-                } else {
-                    toast("URL erfasst. Das Einlesen muss noch integriert werden.")
-                }
+        val load = tvButton("PLAYLIST LADEN") {
+            if (url.text.isBlank()) {
+                toast("Bitte eine Playlist-URL eingeben.")
+            } else {
+                toast("URL erfasst. Das Einlesen muss noch integriert werden.")
             }
-        )
+        }
+
+        content.addView(load)
 
         content.addView(
             tvButton("ZURÜCK") {
@@ -361,9 +366,7 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
-        root.post {
-            url.requestFocus()
-        }
+        url.requestFocus()
     }
 
     // EINGABEFELDER
@@ -408,7 +411,7 @@ class MainActivity : Activity() {
         return edit
     }
 
-    // TV BUTTONS MIT WEISSEM FOKUSRAHMEN
+    // TV BUTTONS
 
     private fun tvButton(
         label: String,
@@ -463,7 +466,7 @@ class MainActivity : Activity() {
         return button
     }
 
-    // FOKUS-DESIGN
+    // WEISSER FOKUSRAHMEN
 
     private fun focusBackground(
         color: Int,
@@ -511,9 +514,11 @@ class MainActivity : Activity() {
                 textSize = size.toFloat()
                 setTextColor(color)
                 gravity = Gravity.CENTER
+
                 if (bold) {
                     setTypeface(null, Typeface.BOLD)
                 }
+
                 setPadding(dp(8), dp(6), dp(8), dp(6))
             },
             LinearLayout.LayoutParams(
@@ -533,7 +538,7 @@ class MainActivity : Activity() {
         )
     }
 
-    // LOKALE PLAYLIST AUSWÄHLEN
+    // LOKALE PLAYLIST
 
     private fun openPlaylist() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -564,7 +569,7 @@ class MainActivity : Activity() {
         }
     }
 
-    // ZURÜCK-TASTE DER FERNBEDIENUNG
+    // FERNBEDIENUNG ZURÜCK-TASTE
 
     override fun onKeyDown(
         keyCode: Int,
@@ -587,3 +592,6 @@ class MainActivity : Activity() {
         ).show()
     }
 }
+
+
+Wo füge ich das ein habe es noch nicht gearbeitet !
