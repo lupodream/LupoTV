@@ -14,7 +14,6 @@
         android:allowBackup="false"
         android:label="LUPO PLAYER"
         android:icon="@drawable/lupo_logo"
-        android:roundIcon="@drawable/lupo_logo"
         android:theme="@style/AppTheme"
         android:banner="@drawable/lupo_logo">
 
@@ -25,7 +24,6 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
