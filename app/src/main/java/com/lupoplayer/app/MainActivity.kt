@@ -8,11 +8,11 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.text.InputType
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -20,123 +20,159 @@ import android.widget.Toast
 
 class MainActivity : Activity() {
 
-    private val bg = Color.rgb(16, 17, 20)
+    private val bg = Color.rgb(12, 13, 17)
+    private val panel = Color.rgb(25, 26, 32)
     private val gold = Color.rgb(218, 177, 96)
-    private val white = Color.rgb(245, 242, 234)
-
+    private val white = Color.WHITE
     private lateinit var content: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showHome()
+        window.statusBarColor = bg
+        window.navigationBarColor = bg
+        showLogin()
     }
 
     private fun base(): LinearLayout {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(42, 22, 42, 28)
+            gravity = Gravity.CENTER
             setBackgroundColor(bg)
+            setPadding(40, 24, 40, 24)
             isFocusableInTouchMode = true
         }
 
-        val scroll = ScrollView(this).apply {
-            isFillViewport = true
-        }
-
+        val scroll = ScrollView(this)
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
+            gravity = Gravity.CENTER
         }
 
         scroll.addView(content)
-        root.addView(scroll, ViewGroup.LayoutParams(-1, -1))
+        root.addView(
+            scroll,
+            ViewGroup.LayoutParams(-1, -1)
+        )
 
         return root
     }
 
-    private fun showHome() {
+    private fun showLogin() {
         val root = base()
 
-        val logo = ImageView(this).apply {
-            setImageResource(R.drawable.lupo_logo)
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            adjustViewBounds = true
+        space(15)
+
+        text("🐺", 48, gold, true)
+        text("LUPO PLAYER", 34, gold, true)
+        text("PREMIUM ENTERTAINMENT", 13, white, true)
+
+        space(28)
+
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(35, 28, 35, 28)
+            background = rounded(panel, 20)
         }
 
-        content.addView(
-            logo,
-            LinearLayout.LayoutParams(230, 185).apply {
-                bottomMargin = 2
+        card.addView(
+            TextView(this).apply {
+                text = "WILLKOMMEN BEI LUPO"
+                textSize = 25f
+                setTextColor(white)
+                gravity = Gravity.CENTER
+                setTypeface(null, Typeface.BOLD)
             }
         )
 
-        text("LUPO PLAYER", 30, gold, true)
-        text("PREMIUM IPTV PLAYER", 13, Color.LTGRAY, false)
+        card.addView(
+            TextView(this).apply {
+                text = "Verbinde deinen Anbieter und starte dein Erlebnis."
+                textSize = 15f
+                setTextColor(Color.LTGRAY)
+                gravity = Gravity.CENTER
+                setPadding(0, 12, 0, 24)
+            }
+        )
 
-        space(24)
-
-        goldButton("ANMELDEN MIT XTREAM CODES") {
+        val xtream = tvButton("MIT XTREAM CODES ANMELDEN") {
             showXtream()
         }
 
-        goldButton("M3U PLAYLIST") {
+        val m3u = tvButton("M3U PLAYLIST") {
             showM3u()
         }
 
-        goldButton("LOKALE PLAYLIST ÖFFNEN") {
+        val local = tvButton("LOKALE PLAYLIST") {
             openPlaylist()
         }
 
-        space(16)
+        card.addView(xtream)
+        card.addView(m3u)
+        card.addView(local)
+
+        content.addView(
+            card,
+            LinearLayout.LayoutParams(650, -2)
+        )
+
+        space(20)
 
         text(
-            "Für eigene oder rechtmäßig lizenzierte Streams",
+            "DEIN STREAMING. DEIN ERLEBNIS.",
             12,
-            Color.GRAY,
-            false
+            gold,
+            true
         )
 
         setContentView(root)
-        content.getChildAt(2)?.requestFocus()
+
+        xtream.requestFocus()
     }
 
     private fun showXtream() {
         val root = base()
 
-        heading("XTREAM CODES")
+        text("LUPO PLAYER", 30, gold, true)
+        text("MIT XTREAM CODES ANMELDEN", 22, white, true)
 
-        val server = field(
+        space(25)
+
+        val server = input(
             "Server-URL",
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+            InputType.TYPE_CLASS_TEXT or
+                InputType.TYPE_TEXT_VARIATION_URI
         )
 
-        val user = field(
+        val username = input(
             "Benutzername",
             InputType.TYPE_CLASS_TEXT
         )
 
-        val pass = field(
+        val password = input(
             "Passwort",
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            InputType.TYPE_CLASS_TEXT or
+                InputType.TYPE_TEXT_VARIATION_PASSWORD
         )
 
-        goldButton("VERBINDEN") {
-            if (server.text.isBlank() ||
-                user.text.isBlank() ||
-                pass.text.isBlank()
+        space(20)
+
+        val connect = tvButton("VERBINDEN") {
+            if (
+                server.text.isBlank() ||
+                username.text.isBlank() ||
+                password.text.isBlank()
             ) {
-                toast("Bitte alle drei Felder ausfüllen.")
+                toast("Bitte alle Felder ausfüllen.")
             } else {
-                toast(
-                    "Eingaben erfasst. Die Anbieter-Verbindung wird im nächsten Entwicklungsschritt ergänzt."
-                )
+                toast("Anmeldedaten erfasst. Die Anbieter-Verbindung ist noch nicht integriert.")
             }
         }
 
-        secondaryButton("ZURÜCK") {
-            showHome()
-        }
+        content.addView(connect)
+        content.addView(
+            tvButton("ZURÜCK") { showLogin() }
+        )
 
         setContentView(root)
         server.requestFocus()
@@ -145,64 +181,135 @@ class MainActivity : Activity() {
     private fun showM3u() {
         val root = base()
 
-        heading("M3U PLAYLIST")
+        text("LUPO PLAYER", 30, gold, true)
+        text("M3U PLAYLIST", 22, white, true)
 
-        val url = field(
-            "M3U-Playlist-URL",
-            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+        space(25)
+
+        val url = input(
+            "M3U Playlist URL",
+            InputType.TYPE_CLASS_TEXT or
+                InputType.TYPE_TEXT_VARIATION_URI
         )
 
-        goldButton("PLAYLIST LADEN") {
+        val load = tvButton("PLAYLIST LADEN") {
             if (url.text.isBlank()) {
                 toast("Bitte eine Playlist-URL eingeben.")
             } else {
-                toast(
-                    "URL erfasst. Das Laden und Abspielen wird im nächsten Entwicklungsschritt ergänzt."
-                )
+                toast("URL erfasst. Das Einlesen ist noch nicht integriert.")
             }
         }
 
-        secondaryButton("ZURÜCK") {
-            showHome()
-        }
+        content.addView(load)
+        content.addView(
+            tvButton("ZURÜCK") { showLogin() }
+        )
 
         setContentView(root)
         url.requestFocus()
     }
 
-    private fun openPlaylist() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "*/*"
+    private fun input(
+        hintText: String,
+        type: Int
+    ): EditText {
+
+        val edit = EditText(this).apply {
+            hint = hintText
+            textSize = 19f
+            setTextColor(white)
+            setHintTextColor(Color.LTGRAY)
+            inputType = type
+            setSingleLine(true)
+            setPadding(20, 12, 20, 12)
+            background = rounded(panel, 10)
+
+            isFocusable = true
+            isFocusableInTouchMode = true
+
+            setOnFocusChangeListener { view, focused ->
+                view.background = focusBackground(
+                    panel,
+                    focused
+                )
+            }
         }
 
-        startActivityForResult(intent, 41)
+        content.addView(
+            edit,
+            LinearLayout.LayoutParams(600, 65).apply {
+                topMargin = 9
+                bottomMargin = 9
+            }
+        )
+
+        return edit
     }
 
-    @Deprecated("Kept compatible with older Fire TV devices")
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun tvButton(
+        label: String,
+        action: () -> Unit
+    ): Button {
 
-        if (requestCode == 41 &&
-            resultCode == RESULT_OK &&
-            data?.data != null
-        ) {
-            toast(
-                "Datei ausgewählt. Das Einlesen der Playlist folgt im nächsten Entwicklungsschritt."
-            )
+        val button = Button(this).apply {
+            text = label
+            textSize = 17f
+            setTextColor(gold)
+            isAllCaps = false
+            typeface = Typeface.DEFAULT_BOLD
+
+            isFocusable = true
+            isFocusableInTouchMode = true
+
+            background = rounded(panel, 12)
+
+            setOnFocusChangeListener { view, focused ->
+                view.background = focusBackground(
+                    panel,
+                    focused
+                )
+
+                setTextColor(
+                    if (focused) white else gold
+                )
+            }
+
+            setOnClickListener {
+                action()
+            }
+        }
+
+        button.layoutParams =
+            LinearLayout.LayoutParams(580, 68).apply {
+                topMargin = 9
+                bottomMargin = 9
+            }
+
+        return button
+    }
+
+    private fun focusBackground(
+        color: Int,
+        focused: Boolean
+    ): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = 12f
+
+            if (focused) {
+                setStroke(3, white)
+            } else {
+                setStroke(1, Color.rgb(75, 75, 80))
+            }
         }
     }
 
-    private fun heading(value: String) {
-        space(28)
-        text("LUPO PLAYER", 27, gold, true)
-        space(18)
-        text(value, 19, white, true)
-        space(18)
+    private fun rounded(
+        color: Int,
+        radius: Int
+    ) = GradientDrawable().apply {
+        setColor(color)
+        cornerRadius = radius.toFloat()
     }
 
     private fun text(
@@ -217,100 +324,13 @@ class MainActivity : Activity() {
                 textSize = size.toFloat()
                 setTextColor(color)
                 gravity = Gravity.CENTER
-
                 if (bold) {
-                    setTypeface(typeface, Typeface.BOLD)
+                    setTypeface(null, Typeface.BOLD)
                 }
-
-                setPadding(8, 5, 8, 5)
+                setPadding(8, 6, 8, 6)
             },
             LinearLayout.LayoutParams(-1, -2)
         )
-    }
-
-    private fun field(
-        hintText: String,
-        type: Int
-    ): EditText {
-        val edit = EditText(this).apply {
-            hint = hintText
-            setHintTextColor(Color.LTGRAY)
-            setTextColor(white)
-            textSize = 17f
-            inputType = type
-            setSingleLine(true)
-            setPadding(18, 12, 18, 12)
-            background = rounded(Color.rgb(38, 39, 43), 10)
-        }
-
-        content.addView(
-            edit,
-            LinearLayout.LayoutParams(520, 58).apply {
-                topMargin = 8
-                bottomMargin = 8
-            }
-        )
-
-        return edit
-    }
-
-    private fun goldButton(
-        label: String,
-        action: () -> Unit
-    ) {
-        val button = Button(this).apply {
-            text = label
-            textSize = 15f
-            setTextColor(Color.rgb(20, 20, 20))
-            isAllCaps = false
-            typeface = Typeface.DEFAULT_BOLD
-            background = rounded(gold, 12)
-            isFocusable = true
-            isFocusableInTouchMode = true
-            setOnClickListener {
-                action()
-            }
-        }
-
-        content.addView(
-            button,
-            LinearLayout.LayoutParams(520, 62).apply {
-                topMargin = 9
-                bottomMargin = 9
-            }
-        )
-    }
-
-    private fun secondaryButton(
-        label: String,
-        action: () -> Unit
-    ) {
-        val button = Button(this).apply {
-            text = label
-            textSize = 14f
-            setTextColor(gold)
-            isAllCaps = false
-            background = rounded(Color.rgb(38, 39, 43), 12)
-            isFocusable = true
-            setOnClickListener {
-                action()
-            }
-        }
-
-        content.addView(
-            button,
-            LinearLayout.LayoutParams(520, 58).apply {
-                topMargin = 12
-            }
-        )
-    }
-
-    private fun rounded(
-        color: Int,
-        radius: Int
-    ) = GradientDrawable().apply {
-        setColor(color)
-        cornerRadius = radius.toFloat()
     }
 
     private fun space(height: Int) {
@@ -318,6 +338,28 @@ class MainActivity : Activity() {
             View(this),
             LinearLayout.LayoutParams(1, height)
         )
+    }
+
+    private fun openPlaylist() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+        }
+
+        startActivityForResult(intent, 41)
+    }
+
+    @Deprecated("Legacy document picker callback")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 41 && resultCode == RESULT_OK) {
+            toast("Datei ausgewählt. Das Einlesen folgt noch.")
+        }
     }
 
     private fun toast(message: String) {
