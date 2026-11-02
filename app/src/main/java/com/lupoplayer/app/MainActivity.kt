@@ -1,3 +1,4 @@
+
 package com.lupoplayer.app
 
 import android.app.Activity
@@ -20,17 +21,25 @@ import android.widget.Toast
 
 class MainActivity : Activity() {
 
-    private val bg = Color.rgb(12, 13, 17)
-    private val panel = Color.rgb(25, 26, 32)
+    private val bg = Color.rgb(9, 11, 17)
+    private val panel = Color.rgb(25, 29, 42)
     private val gold = Color.rgb(218, 177, 96)
     private val white = Color.WHITE
+    private val muted = Color.rgb(175, 180, 190)
+
     private lateinit var content: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.statusBarColor = bg
         window.navigationBarColor = bg
-        showLogin()
+
+        showHome()
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 
     private fun base(): LinearLayout {
@@ -38,103 +47,236 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setBackgroundColor(bg)
-            setPadding(40, 24, 40, 24)
+            setPadding(dp(28), dp(20), dp(28), dp(20))
             isFocusableInTouchMode = true
         }
 
-        val scroll = ScrollView(this)
-        content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+            clipToPadding = false
         }
 
-        scroll.addView(content)
+        content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(0, dp(10), 0, dp(20))
+        }
+
+        scroll.addView(
+            content,
+            ScrollView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
         root.addView(
             scroll,
-            ViewGroup.LayoutParams(-1, -1)
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
         )
 
         return root
     }
 
-    private fun showLogin() {
+    // STARTSEITE
+
+    private fun showHome() {
         val root = base()
 
-        space(15)
-
-        text("🐺", 48, gold, true)
-        text("LUPO PLAYER", 34, gold, true)
-        text("PREMIUM ENTERTAINMENT", 13, white, true)
+        space(12)
+        text("🐺", 54, gold, true)
+        text("LUPO PLAYER", 38, gold, true)
+        text("PREMIUM ENTERTAINMENT", 14, white, true)
 
         space(28)
 
-        val card = LinearLayout(this).apply {
+        val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(35, 28, 35, 28)
+            setPadding(dp(24), dp(28), dp(24), dp(28))
             background = rounded(panel, 20)
         }
 
-        card.addView(
+        hero.addView(
             TextView(this).apply {
                 text = "WILLKOMMEN BEI LUPO"
-                textSize = 25f
+                textSize = 27f
                 setTextColor(white)
                 gravity = Gravity.CENTER
                 setTypeface(null, Typeface.BOLD)
             }
         )
 
-        card.addView(
+        hero.addView(
             TextView(this).apply {
-                text = "Verbinde deinen Anbieter und starte dein Erlebnis."
-                textSize = 15f
-                setTextColor(Color.LTGRAY)
+                text = "Dein Streaming. Dein Erlebnis."
+                textSize = 16f
+                setTextColor(muted)
                 gravity = Gravity.CENTER
-                setPadding(0, 12, 0, 24)
+                setPadding(0, dp(12), 0, dp(8))
             }
         )
 
-        val xtream = tvButton("MIT XTREAM CODES ANMELDEN") {
-            showXtream()
-        }
+        content.addView(
+            hero,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
 
-        val m3u = tvButton("M3U PLAYLIST") {
-            showM3u()
-        }
-
-        val local = tvButton("LOKALE PLAYLIST") {
-            openPlaylist()
-        }
-
-        card.addView(xtream)
-        card.addView(m3u)
-        card.addView(local)
+        space(25)
+        text("ENTDECKEN", 20, gold, true)
+        space(12)
 
         content.addView(
-            card,
-            LinearLayout.LayoutParams(650, -2)
+            tvButton("LIVE TV") {
+                showCategory("LIVE TV")
+            }
+        )
+
+        content.addView(
+            tvButton("FILME") {
+                showCategory("FILME")
+            }
+        )
+
+        content.addView(
+            tvButton("SERIEN") {
+                showCategory("SERIEN")
+            }
+        )
+
+        content.addView(
+            tvButton("MEINE LISTE") {
+                showCategory("MEINE LISTE")
+            }
+        )
+
+        content.addView(
+            tvButton("SUCHE") {
+                showCategory("SUCHE")
+            }
+        )
+
+        content.addView(
+            tvButton("EINSTELLUNGEN") {
+                showSettings()
+            }
+        )
+
+        space(20)
+        text("LUPO PLAYER  •  PREMIUM", 12, muted, true)
+
+        setContentView(root)
+
+        root.post {
+            content.getChildAt(3)?.requestFocus()
+        }
+    }
+
+    // KATEGORIE-SEITEN
+
+    private fun showCategory(name: String) {
+        val root = base()
+
+        space(20)
+        text("🐺 LUPO PLAYER", 30, gold, true)
+        space(35)
+        text(name, 30, white, true)
+        space(20)
+
+        text(
+            "Hier erscheinen deine Inhalte.",
+            18,
+            muted,
+            false
+        )
+
+        space(12)
+
+        text(
+            "Verbinde zuerst deinen IPTV-Anbieter in den Einstellungen.",
+            15,
+            muted,
+            false
+        )
+
+        space(35)
+
+        content.addView(
+            tvButton("ZURÜCK ZUR STARTSEITE") {
+                showHome()
+            }
+        )
+
+        content.addView(
+            tvButton("EINSTELLUNGEN") {
+                showSettings()
+            }
+        )
+
+        setContentView(root)
+        root.post {
+            content.getChildAt(content.childCount - 2).requestFocus()
+        }
+    }
+
+    // EINSTELLUNGEN
+
+    private fun showSettings() {
+        val root = base()
+
+        space(20)
+        text("🐺 LUPO PLAYER", 30, gold, true)
+        text("EINSTELLUNGEN", 24, white, true)
+
+        space(30)
+
+        content.addView(
+            tvButton("XTREAM CODES ANMELDEN") {
+                showXtream()
+            }
+        )
+
+        content.addView(
+            tvButton("M3U PLAYLIST") {
+                showM3u()
+            }
+        )
+
+        content.addView(
+            tvButton("LOKALE PLAYLIST") {
+                openPlaylist()
+            }
         )
 
         space(20)
 
-        text(
-            "DEIN STREAMING. DEIN ERLEBNIS.",
-            12,
-            gold,
-            true
+        content.addView(
+            tvButton("ZURÜCK") {
+                showHome()
+            }
         )
 
         setContentView(root)
-
-        xtream.requestFocus()
+        root.post {
+            content.getChildAt(0).requestFocus()
+        }
     }
+
+    // XTREAM LOGIN
 
     private fun showXtream() {
         val root = base()
 
+        space(20)
         text("LUPO PLAYER", 30, gold, true)
-        text("MIT XTREAM CODES ANMELDEN", 22, white, true)
+        text("XTREAM CODES", 23, white, true)
 
         space(25)
 
@@ -155,34 +297,42 @@ class MainActivity : Activity() {
                 InputType.TYPE_TEXT_VARIATION_PASSWORD
         )
 
-        space(20)
+        space(15)
 
-        val connect = tvButton("VERBINDEN") {
-            if (
-                server.text.isBlank() ||
-                username.text.isBlank() ||
-                password.text.isBlank()
-            ) {
-                toast("Bitte alle Felder ausfüllen.")
-            } else {
-                toast("Anmeldedaten erfasst. Die Anbieter-Verbindung ist noch nicht integriert.")
-            }
-        }
-
-        content.addView(connect)
         content.addView(
-            tvButton("ZURÜCK") { showLogin() }
+            tvButton("VERBINDEN") {
+                if (
+                    server.text.isBlank() ||
+                    username.text.isBlank() ||
+                    password.text.isBlank()
+                ) {
+                    toast("Bitte alle Felder ausfüllen.")
+                } else {
+                    toast("Anmeldedaten erfasst. Die Anbieter-Verbindung muss noch integriert werden.")
+                }
+            }
+        )
+
+        content.addView(
+            tvButton("ZURÜCK") {
+                showSettings()
+            }
         )
 
         setContentView(root)
-        server.requestFocus()
+        root.post {
+            server.requestFocus()
+        }
     }
+
+    // M3U PLAYLIST
 
     private fun showM3u() {
         val root = base()
 
+        space(20)
         text("LUPO PLAYER", 30, gold, true)
-        text("M3U PLAYLIST", 22, white, true)
+        text("M3U PLAYLIST", 23, white, true)
 
         space(25)
 
@@ -192,22 +342,31 @@ class MainActivity : Activity() {
                 InputType.TYPE_TEXT_VARIATION_URI
         )
 
-        val load = tvButton("PLAYLIST LADEN") {
-            if (url.text.isBlank()) {
-                toast("Bitte eine Playlist-URL eingeben.")
-            } else {
-                toast("URL erfasst. Das Einlesen ist noch nicht integriert.")
-            }
-        }
+        space(15)
 
-        content.addView(load)
         content.addView(
-            tvButton("ZURÜCK") { showLogin() }
+            tvButton("PLAYLIST LADEN") {
+                if (url.text.isBlank()) {
+                    toast("Bitte eine Playlist-URL eingeben.")
+                } else {
+                    toast("URL erfasst. Das Einlesen muss noch integriert werden.")
+                }
+            }
+        )
+
+        content.addView(
+            tvButton("ZURÜCK") {
+                showSettings()
+            }
         )
 
         setContentView(root)
-        url.requestFocus()
+        root.post {
+            url.requestFocus()
+        }
     }
+
+    // EINGABEFELDER
 
     private fun input(
         hintText: String,
@@ -216,13 +375,13 @@ class MainActivity : Activity() {
 
         val edit = EditText(this).apply {
             hint = hintText
-            textSize = 19f
+            textSize = 18f
             setTextColor(white)
-            setHintTextColor(Color.LTGRAY)
+            setHintTextColor(muted)
             inputType = type
             setSingleLine(true)
-            setPadding(20, 12, 20, 12)
-            background = rounded(panel, 10)
+            setPadding(dp(18), dp(10), dp(18), dp(10))
+            background = rounded(panel, 12)
 
             isFocusable = true
             isFocusableInTouchMode = true
@@ -237,14 +396,19 @@ class MainActivity : Activity() {
 
         content.addView(
             edit,
-            LinearLayout.LayoutParams(600, 65).apply {
-                topMargin = 9
-                bottomMargin = 9
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(65)
+            ).apply {
+                topMargin = dp(8)
+                bottomMargin = dp(8)
             }
         )
 
         return edit
     }
+
+    // TV BUTTONS MIT WEISSEM FOKUSRAHMEN
 
     private fun tvButton(
         label: String,
@@ -258,10 +422,18 @@ class MainActivity : Activity() {
             isAllCaps = false
             typeface = Typeface.DEFAULT_BOLD
 
+            gravity = Gravity.CENTER
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+
+            minHeight = 0
+            minimumHeight = 0
+            minWidth = 0
+            minimumWidth = 0
+
             isFocusable = true
             isFocusableInTouchMode = true
 
-            background = rounded(panel, 12)
+            background = focusBackground(panel, false)
 
             setOnFocusChangeListener { view, focused ->
                 view.background = focusBackground(
@@ -280,26 +452,35 @@ class MainActivity : Activity() {
         }
 
         button.layoutParams =
-            LinearLayout.LayoutParams(580, 68).apply {
-                topMargin = 9
-                bottomMargin = 9
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(76)
+            ).apply {
+                topMargin = dp(7)
+                bottomMargin = dp(7)
             }
 
         return button
     }
 
+    // FOKUS-DESIGN
+
     private fun focusBackground(
         color: Int,
         focused: Boolean
     ): GradientDrawable {
+
         return GradientDrawable().apply {
             setColor(color)
-            cornerRadius = 12f
+            cornerRadius = dp(12).toFloat()
 
             if (focused) {
-                setStroke(3, white)
+                setStroke(dp(3), white)
             } else {
-                setStroke(1, Color.rgb(75, 75, 80))
+                setStroke(
+                    dp(1),
+                    Color.rgb(75, 78, 88)
+                )
             }
         }
     }
@@ -307,10 +488,15 @@ class MainActivity : Activity() {
     private fun rounded(
         color: Int,
         radius: Int
-    ) = GradientDrawable().apply {
-        setColor(color)
-        cornerRadius = radius.toFloat()
+    ): GradientDrawable {
+
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(radius).toFloat()
+        }
     }
+
+    // TEXT
 
     private fun text(
         value: String,
@@ -318,6 +504,7 @@ class MainActivity : Activity() {
         color: Int,
         bold: Boolean
     ) {
+
         content.addView(
             TextView(this).apply {
                 text = value
@@ -327,18 +514,26 @@ class MainActivity : Activity() {
                 if (bold) {
                     setTypeface(null, Typeface.BOLD)
                 }
-                setPadding(8, 6, 8, 6)
+                setPadding(dp(8), dp(6), dp(8), dp(6))
             },
-            LinearLayout.LayoutParams(-1, -2)
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
         )
     }
 
     private fun space(height: Int) {
         content.addView(
             View(this),
-            LinearLayout.LayoutParams(1, height)
+            LinearLayout.LayoutParams(
+                1,
+                dp(height)
+            )
         )
     }
+
+    // LOKALE PLAYLIST AUSWÄHLEN
 
     private fun openPlaylist() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -355,11 +550,33 @@ class MainActivity : Activity() {
         resultCode: Int,
         data: Intent?
     ) {
-        super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(
+            requestCode,
+            resultCode,
+            data
+        )
 
-        if (requestCode == 41 && resultCode == RESULT_OK) {
-            toast("Datei ausgewählt. Das Einlesen folgt noch.")
+        if (
+            requestCode == 41 &&
+            resultCode == RESULT_OK
+        ) {
+            toast("Datei ausgewählt. Das Einlesen muss noch integriert werden.")
         }
+    }
+
+    // ZURÜCK-TASTE DER FERNBEDIENUNG
+
+    override fun onKeyDown(
+        keyCode: Int,
+        event: KeyEvent?
+    ): Boolean {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showHome()
+            return true
+        }
+
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun toast(message: String) {
