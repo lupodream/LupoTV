@@ -97,7 +97,7 @@ class MainActivity : Activity() {
         )
     }
 
-    // STARTSEITE
+    // STARTSEITE – ANMELDEART AUSWÄHLEN
 
     private fun showHome() {
         val root = base()
@@ -108,88 +108,29 @@ class MainActivity : Activity() {
         text("LUPO PLAYER", 34, gold, true)
         text("PREMIUM ENTERTAINMENT", 14, white, true)
 
-        space(20)
+        space(24)
 
-        val hero = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(dp(24), dp(25), dp(24), dp(25))
-            background = rounded(panel, 20)
+        text("WILLKOMMEN BEI LUPO", 25, white, true)
+        text("Wähle deine Anmeldemethode", 16, muted, false)
+
+        space(18)
+
+        val xtream = tvButton("XTREAM CODES") {
+            showXtream()
         }
-
-        hero.addView(
-            TextView(this).apply {
-                text = "WILLKOMMEN BEI LUPO"
-                textSize = 26f
-                setTextColor(white)
-                gravity = Gravity.CENTER
-                setTypeface(null, Typeface.BOLD)
-            }
-        )
-
-        hero.addView(
-            TextView(this).apply {
-                text = "Dein Streaming. Dein Erlebnis."
-                textSize = 16f
-                setTextColor(muted)
-                gravity = Gravity.CENTER
-                setPadding(0, dp(12), 0, dp(8))
-            }
-        )
+        content.addView(xtream)
 
         content.addView(
-            hero,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
-
-        space(22)
-        text("ENTDECKEN", 20, gold, true)
-        space(10)
-
-        val live = tvButton("LIVE TV") {
-            showCategory("LIVE TV")
-        }
-        content.addView(live)
-
-        content.addView(
-            tvButton("FILME") {
-                showCategory("FILME")
-            }
-        )
-
-        content.addView(
-            tvButton("SERIEN") {
-                showCategory("SERIEN")
-            }
-        )
-
-        content.addView(
-            tvButton("MEINE LISTE") {
-                showCategory("MEINE LISTE")
-            }
-        )
-
-        content.addView(
-            tvButton("SUCHE") {
-                showCategory("SUCHE")
-            }
-        )
-
-        content.addView(
-            tvButton("EINSTELLUNGEN") {
-                showSettings()
+            tvButton("M3U PLAYLIST") {
+                showM3u()
             }
         )
 
         space(20)
-        text("DEIN STREAMING. DEIN ERLEBNIS.", 12, gold, true)
+        text("Dein Streaming. Dein Erlebnis.", 12, gold, true)
 
         setContentView(root)
-
-        live.requestFocus()
+        xtream.requestFocus()
     }
 
     // KATEGORIEN
