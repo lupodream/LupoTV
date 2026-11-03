@@ -1,4 +1,4 @@
-package com.lupoplayer.app
+cpackage com.lupoplayer.app
 
 import android.app.Activity
 import android.os.Bundle
@@ -592,6 +592,3 @@ class MainActivity : Activity() {
         ).show()
     }
 }
-
-
-Wo füge ich das ein habe es noch nicht gearbeitet !
