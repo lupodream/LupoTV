@@ -1,4 +1,4 @@
-cpackage com.lupoplayer.app
+package com.lupoplayer.app
 
 import android.app.Activity
 import android.os.Bundle
