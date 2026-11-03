@@ -12,10 +12,11 @@
         android:required="false" />
 
     <application
-        android:allowBackup="false"
-        android:label="LUPO PLAYER"
-        android:icon="@drawable/lupo_logo"
-        android:theme="@style/AppTheme">
+    android:usesCleartextTraffic="true"
+    android:allowBackup="false"
+    android:label="LUPO PLAYER"
+    android:icon="@drawable/lupo_logo"
+    android:theme="@style/AppTheme">
 
         <activity
             android:name=".MainActivity"
