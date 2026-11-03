@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.text.InputType
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -117,35 +118,48 @@ class MainActivity : Activity() {
 
     private fun showLogin() {
         val root = base()
-        space(8); brandHeader(); space(24)
-        text("ANMELDEN", 20, white, true)
-        val serverInput = input("Server-Adresse (z. B. http://server:port)", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
-        serverInput.setText(server)
-        val userInput = input("Benutzername", InputType.TYPE_CLASS_TEXT)
-        userInput.setText(username)
-        val passInput = input("Passwort", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        passInput.setText(password)
+        content.gravity = Gravity.CENTER
+        space(10)
+        val panelCard = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            background = rounded(Color.rgb(13, 17, 26), 22)
+            setPadding(dp(34), dp(22), dp(34), dp(22))
+        }
+        content.addView(panelCard, LinearLayout.LayoutParams(dp(620), ViewGroup.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER })
+        val oldContent = content
+        content = panelCard
+        logo(112)
+        text("LUPO PLAYER", 31, gold, true)
+        text("PREMIUM IPTV PLAYER", 12, white, true)
+        val stripe = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; setPadding(0, dp(4), 0, dp(10)) }
+        listOf(Color.rgb(0,145,65), white, Color.rgb(220,25,45)).forEach { c -> stripe.addView(View(this).apply { setBackgroundColor(c) }, LinearLayout.LayoutParams(dp(26), dp(3))) }
+        content.addView(stripe)
+        space(8)
+        text("WILLKOMMEN ZURÜCK", 21, white, true)
+        text("Melde dich mit deinen Zugangsdaten an", 13, muted, false)
         space(12)
-        val login = tvButton("LOGIN") {
+        val serverInput = input("Server-Adresse (z. B. http://server:port)", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI).also { it.setText(server) }
+        val userInput = input("Benutzername", InputType.TYPE_CLASS_TEXT).also { it.setText(username) }
+        val passInput = input("Passwort", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD).also { it.setText(password) }
+        space(8)
+        val login = tvButton("ANMELDEN") {
             val s = serverInput.text.toString().trim().trimEnd('/')
             val u = userInput.text.toString().trim()
             val p = passInput.text.toString()
             if (s.isBlank() || u.isBlank() || p.isBlank()) toast("Bitte Server, Benutzername und Passwort eingeben.")
             else connectXtream(s, u, p, showProgress = true)
         }
+        login.background = rounded(gold, 12); login.setTextColor(Color.BLACK)
         content.addView(login)
-        space(12)
-        text("ODER M3U PLAYLIST", 14, gold, true)
-        val playlistInput = input("M3U-Playlist-URL", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
-        playlistInput.setText(m3uUrl)
+        space(8)
+        text("ODER M3U-PLAYLIST", 12, gold, true)
+        val playlistInput = input("M3U-Playlist-URL", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI).also { it.setText(m3uUrl) }
         content.addView(tvButton("M3U LADEN") {
             val url = playlistInput.text.toString().trim()
-            if (url.isBlank()) toast("Bitte eine M3U-Adresse eingeben.") else {
-                m3uUrl = url
-                prefs.edit().putString("m3u", url).apply()
-                loadM3u(url)
-            }
+            if (url.isBlank()) toast("Bitte eine M3U-Adresse eingeben.") else { m3uUrl = url; prefs.edit().putString("m3u", url).apply(); loadM3u(url) }
         })
+        content = oldContent
         setContentView(root)
         serverInput.requestFocus()
     }
@@ -232,47 +246,83 @@ class MainActivity : Activity() {
     }
 
     private fun showHome() {
+        currentTab = "HOME"
         val root = base()
+        content.setPadding(dp(24), dp(8), dp(24), dp(24))
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val title = TextView(this).apply { text = "🐺 LUPO PLAYER"; textSize = 25f; setTextColor(gold); setTypeface(null, Typeface.BOLD) }
-        top.addView(title, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        top.addView(tvButton("⚙") { showSettings() }, LinearLayout.LayoutParams(dp(76), dp(52)))
+        val brand = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val wolf = ImageView(this).apply { setImageResource(R.drawable.lupo_logo); scaleType = ImageView.ScaleType.FIT_CENTER }
+        brand.addView(wolf, LinearLayout.LayoutParams(dp(48), dp(48)))
+        brand.addView(TextView(this).apply { text = "LUPO PLAYER"; textSize = 22f; setTextColor(gold); setTypeface(null, Typeface.BOLD); setPadding(dp(8),0,0,0) })
+        top.addView(brand, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        top.addView(tvButton("⌕ SUCHE") { showSearch() }, LinearLayout.LayoutParams(dp(125), dp(48)))
+        top.addView(tvButton("⚙") { showSettings() }, LinearLayout.LayoutParams(dp(64), dp(48)))
         content.addView(top)
-        space(8)
-        val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        listOf("HOME", "LIVE TV", "FILME", "SERIEN", "EINSTELLUNGEN").forEach { tab ->
-            nav.addView(tvButton(tab) { when(tab) { "HOME" -> showHome(); "LIVE TV" -> showLive(); "FILME" -> showMedia("FILME", currentMovies); "SERIEN" -> showMedia("SERIEN", currentSeries); else -> showSettings() } }, LinearLayout.LayoutParams(0, dp(52), 1f))
+        val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        listOf("HOME", "LIVE TV", "FILME", "SERIEN", "SPORT", "KIDS", "PLAYLIST").forEach { tab ->
+            nav.addView(tvButton(tab) { when(tab) {
+                "HOME" -> showHome()
+                "LIVE TV" -> showLive()
+                "FILME" -> showMedia("FILME", currentMovies)
+                "SERIEN" -> showMedia("SERIEN", currentSeries)
+                "SPORT" -> showMedia("SPORT", (currentMovies + currentSeries).filter { it.group.contains("sport", true) || it.name.contains("sport", true) })
+                "KIDS" -> showMedia("KIDS", (currentMovies + currentSeries).filter { it.group.contains("kid", true) || it.group.contains("kind", true) || it.name.contains("kid", true) })
+                else -> showPlaylist()
+            } }, LinearLayout.LayoutParams(0, dp(48), 1f))
         }
         content.addView(nav)
-        space(14)
-        text("WILLKOMMEN ZURÜCK", 22, white, true)
-        text(if (isM3uMode) "DEINE PLAYLIST" else "DEIN ENTERTAINMENT", 13, gold, true)
-        space(12)
+        space(10)
         heroCard()
-        section("LIVE TV", currentChannels.take(8).map { MediaEntry(it.name, it.url, it.group, it.logo) }) { showLive() }
-        section("FILME", currentMovies.take(8)) { showMedia("FILME", currentMovies) }
-        section("SERIEN", currentSeries.take(8)) { showMedia("SERIEN", currentSeries) }
+        section("WEITER ANSEHEN", (currentMovies + currentSeries).take(8)) { showMedia("WEITER ANSEHEN", currentMovies + currentSeries) }
+        section("FILME", currentMovies) { showMedia("FILME", currentMovies) }
+        section("SERIEN", currentSeries) { showMedia("SERIEN", currentSeries) }
+        section("LIVE TV", currentChannels.map { MediaEntry(it.name, it.url, it.group, it.logo) }) { showLive() }
         setContentView(root)
     }
 
     private fun heroCard() {
-        val card = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; background = rounded(panel, 18); setPadding(dp(22), dp(18), dp(22), dp(18)) }
-        card.addView(TextView(this).apply { text = "LUPO PLAYER"; textSize = 27f; setTextColor(gold); setTypeface(null, Typeface.BOLD); gravity = Gravity.CENTER })
-        card.addView(TextView(this).apply { text = "LIVE TV  •  FILME  •  SERIEN"; textSize = 14f; setTextColor(white); gravity = Gravity.CENTER; setPadding(0, dp(8), 0, dp(12)) })
-        card.addView(tvButton("JETZT ENTDECKEN") { showLive() })
-        content.addView(card, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(170)))
+        val featured = currentMovies.firstOrNull() ?: currentSeries.firstOrNull()
+        val card = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.BOTTOM; background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(Color.rgb(35,39,50), Color.rgb(8,11,18))); cornerRadius = dp(18).toFloat(); setPadding(dp(30), dp(22), dp(30), dp(22)) }
+        card.addView(TextView(this).apply { text = "LUPO ORIGINAL"; textSize = 12f; setTextColor(gold); setTypeface(null, Typeface.BOLD) })
+        card.addView(TextView(this).apply { text = featured?.name ?: "DEIN ENTERTAINMENT"; textSize = 30f; setTextColor(white); setTypeface(null, Typeface.BOLD); setPadding(0, dp(8), 0, dp(4)) })
+        card.addView(TextView(this).apply { text = if (featured != null) "Jetzt entdecken und direkt weitersehen." else "LIVE TV  •  FILME  •  SERIEN"; textSize = 15f; setTextColor(muted); setPadding(0, 0, 0, dp(10)) })
+        card.addView(tvButton(if (featured != null) "▶  JETZT ABSPIELEN" else "▶  LIVE TV ÖFFNEN") { if (featured != null) play(featured.url, featured.name) else showLive() }, LinearLayout.LayoutParams(dp(230), dp(52)))
+        content.addView(card, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(225)))
     }
 
     private fun section(title: String, items: List<MediaEntry>, action: () -> Unit) {
-        space(14); val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        header.addView(TextView(this).apply { text = title; textSize = 19f; setTextColor(white); setTypeface(null, Typeface.BOLD) }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        header.addView(tvButton("ALLE ANZEIGEN") { action() }, LinearLayout.LayoutParams(dp(145), dp(44)))
+        space(16)
+        val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        header.addView(TextView(this).apply { text = title; textSize = 20f; setTextColor(white); setTypeface(null, Typeface.BOLD) }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        header.addView(tvButton("ALLE ANZEIGEN  ›") { action() }, LinearLayout.LayoutParams(dp(155), dp(42)))
         content.addView(header)
-        if (items.isEmpty()) text("Noch keine Inhalte geladen", 13, muted, false)
-        else items.take(6).forEach { item -> content.addView(tvButton(item.name) { play(item.url, item.name) }) }
+        if (items.isEmpty()) { text("Noch keine Inhalte geladen", 13, muted, false); return }
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        items.take(10).forEach { item ->
+            val poster = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; background = rounded(panel, 10); setPadding(dp(5), dp(5), dp(5), dp(5)); isFocusable = true; isFocusableInTouchMode = true; setOnClickListener { play(item.url, item.name) }; setOnFocusChangeListener { v, focused -> v.background = focusBackground(panel, focused) } }
+            val art = ImageView(this).apply { scaleType = ImageView.ScaleType.CENTER_CROP; setBackgroundColor(Color.rgb(35,40,52)) }
+            poster.addView(art, LinearLayout.LayoutParams(dp(142), dp(116)))
+            poster.addView(TextView(this).apply { text = item.name; textSize = 12f; maxLines = 2; setTextColor(white); setPadding(dp(4), dp(6), dp(4), dp(4)) }, LinearLayout.LayoutParams(dp(142), dp(48)))
+            row.addView(poster, LinearLayout.LayoutParams(dp(154), dp(180)).apply { rightMargin = dp(9) })
+            if (item.logo.isNotBlank()) loadArtwork(item.logo, art)
+        }
+        val horizontal = android.widget.HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(row) }
+        content.addView(horizontal, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(186)))
+    }
+
+    private fun loadArtwork(address: String, target: ImageView) {
+        executor.execute {
+            try {
+                val connection = (URL(address).openConnection() as HttpURLConnection).apply { connectTimeout = 8000; readTimeout = 8000 }
+                val bitmap = connection.inputStream.use { android.graphics.BitmapFactory.decodeStream(it) }
+                connection.disconnect()
+                if (bitmap != null) runOnUiThread { if (!isFinishing) target.setImageBitmap(bitmap) }
+            } catch (_: Exception) { }
+        }
     }
 
     private fun showLive() {
+        currentTab = "LIVE TV"
         val root = base(); addNav(); text("LIVE TV", 25, gold, true)
         if (currentChannels.isEmpty()) text("Keine Sender geladen. Bitte Anbieter verbinden.", 15, muted, false)
         else currentChannels.groupBy { it.group }.toSortedMap().forEach { (group, list) ->
@@ -283,6 +333,7 @@ class MainActivity : Activity() {
     }
 
     private fun showMedia(title: String, items: List<MediaEntry>) {
+        currentTab = title
         val root = base(); addNav(); text(title, 25, gold, true)
         if (items.isEmpty()) text("Dein Anbieter stellt hier momentan keine Inhalte bereit.", 15, muted, false)
         else items.groupBy { it.group }.toSortedMap().forEach { (group, list) ->
@@ -294,12 +345,62 @@ class MainActivity : Activity() {
 
     private fun addNav() {
         val nav = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        listOf("HOME", "LIVE TV", "FILME", "SERIEN", "EINSTELLUNGEN").forEach { tab -> nav.addView(tvButton(tab) { when(tab) { "HOME" -> showHome(); "LIVE TV" -> showLive(); "FILME" -> showMedia("FILME", currentMovies); "SERIEN" -> showMedia("SERIEN", currentSeries); else -> showSettings() } }, LinearLayout.LayoutParams(0, dp(50), 1f)) }
+        listOf("HOME", "LIVE TV", "FILME", "SERIEN", "SPORT", "KIDS", "PLAYLIST").forEach { tab ->
+            nav.addView(tvButton(tab) { when(tab) {
+                "HOME" -> showHome()
+                "LIVE TV" -> showLive()
+                "FILME" -> showMedia("FILME", currentMovies)
+                "SERIEN" -> showMedia("SERIEN", currentSeries)
+                "SPORT" -> showMedia("SPORT", (currentMovies + currentSeries).filter { it.group.contains("sport", true) || it.name.contains("sport", true) })
+                "KIDS" -> showMedia("KIDS", (currentMovies + currentSeries).filter { it.group.contains("kid", true) || it.group.contains("kind", true) || it.name.contains("kid", true) })
+                else -> showPlaylist()
+            } }, LinearLayout.LayoutParams(0, dp(48), 1f))
+        }
         content.addView(nav)
     }
 
+    private fun showSearch() {
+        currentTab = "SUCHE"
+        val root = base(); addNav()
+        text("SUCHEN", 25, gold, true)
+        val query = input("Film, Serie oder Sender suchen …", InputType.TYPE_CLASS_TEXT)
+        val results = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        content.addView(results)
+        fun updateResults(value: String) {
+            results.removeAllViews()
+            val q = value.trim()
+            if (q.isBlank()) return
+            val all = currentChannels.map { MediaEntry(it.name, it.url, it.group, it.logo) } + currentMovies + currentSeries
+            all.filter { it.name.contains(q, true) || it.group.contains(q, true) }.take(80).forEach { item ->
+                results.addView(tvButton("▶  ${item.name}") { play(item.url, item.name) })
+            }
+            if (results.childCount == 0) results.addView(TextView(this).apply { text = "Keine Treffer gefunden"; setTextColor(muted); textSize = 15f; setPadding(dp(12), dp(18), dp(12), dp(18)) })
+        }
+        query.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { updateResults(s?.toString() ?: "") }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+        setContentView(root); query.requestFocus()
+    }
+
+    private fun showPlaylist() {
+        currentTab = "PLAYLIST"
+        val root = base(); addNav(); text("PLAYLIST", 25, gold, true)
+        text(if (isM3uMode) "M3U-PLAYLIST" else "XTREAM-CODES-PLAYLIST", 13, muted, true)
+        val entries = currentChannels.map { MediaEntry(it.name, it.url, it.group, it.logo) }
+        if (entries.isEmpty()) text("Keine Playlist geladen.", 15, muted, false)
+        else entries.groupBy { it.group }.toSortedMap().forEach { (group, list) ->
+            space(10); text(group, 18, white, true)
+            list.forEach { item -> content.addView(tvButton("▶  ${item.name}") { play(item.url, item.name) }) }
+        }
+        content.addView(tvButton("PLAYLIST / ZUGANG ÄNDERN") { showLogin() })
+        setContentView(root)
+    }
+
     private fun showSettings() {
-        val root = base(); brandHeader(); text("EINSTELLUNGEN", 23, white, true); space(12)
+        currentTab = "EINSTELLUNGEN"
+        val root = base(); addNav(); brandHeader(); text("EINSTELLUNGEN", 23, white, true); space(12)
         content.addView(tvButton("ZUGANGSDATEN ÄNDERN") { showLogin() })
         content.addView(tvButton("M3U-PLAYLIST LADEN") { showLogin() })
         content.addView(tvButton("ZUGANGSDATEN LÖSCHEN") { prefs.edit().clear().apply(); server=""; username=""; password=""; currentChannels=emptyList(); currentMovies=emptyList(); currentSeries=emptyList(); showLogin() })
@@ -353,7 +454,10 @@ class MainActivity : Activity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (player != null) { releasePlayer(); showHome() } else if (currentTab != "HOME" && currentChannels.isNotEmpty()) showHome() else showLogin()
+            if (player != null) { releasePlayer(); showHome() }
+            else if (currentTab != "HOME" && currentChannels.isNotEmpty()) showHome()
+            else if (server.isNotBlank() || isM3uMode) showHome()
+            else showLogin()
             return true
         }
         return super.onKeyDown(keyCode, event)
